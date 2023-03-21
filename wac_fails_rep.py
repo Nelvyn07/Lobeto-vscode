@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-Created on Mon Jan 17th 2023
-@author: yandee
+This code is used to create .rep file for WAC fails reporting.
+The code works for one or multiple child lots.
+The WAC fails csv files (one csv file for each child lot) are obtained from LOBETO: FAILS ONLY->EXPORT XLS
+The csv files have their default names starting by 'table.csv'. Do not change the name, just place them in the waferworkspace folder, i.e \\vdrsfile5\wafersworkspace$\22FDSOI\Product\Lot\
 
-This code is used to create a table of WAC fails and the .plo file. 
-The WAC fails csv files are obtained from LOBETO: FAILS ONLY->EXPORT XLS
-
-A splitsheet from EASI exported as 'DCUBE' format is also needed.
+A splitsheet from EASI exported as 'DCUBE' format is also needed. This is normally exported automatically from EASI to this folder: \\drsfile5\wafersworkspace$\_automation\EASIsplitsD3\
 """
 import glob
 import pandas as pd
@@ -20,7 +19,6 @@ working_folder = input('Enter your working folder: ')
 shortLot = working_folder.split("\\")[-1]
 working_folder = working_folder+"\\"
 
-Product_ID = input('Enter the Product ID: ')
 splitsheet_folder = '\\\\vdrsfile5\\wafersworkspace$\\_automation\\EASIsplitsD3\\'
 
 # Set the path to the folder containing the CSV files
@@ -98,30 +96,7 @@ df_merged.iloc[:,2:]=df_merged.iloc[:,2:].applymap(wac_fill)
 
 df_merged.to_excel(working_folder+'wac_fails_summary.xlsx', index=False)
 
-'''
-from openpyxl import load_workbook
 
-wb = load_workbook(working_folder + 'wac_fails_summary.xlsx')
-ws = wb.active # to grab the active worksheet 
-
-ws['B1'] = 'Wafer#'
-
-from openpyxl.styles import Font, colors, Color, Alignment, PatternFill, Border, Side    
-
-thin_border = Border(left=Side(style='thin'), 
-                     right=Side(style='thin'), 
-                     top=Side(style='thin'), 
-                     bottom=Side(style='thin'))
-
-for row in ws.iter_rows():
-    for cell in row:
-        cell.border = thin_border
-        cell.font = Font(size =10)
-        cell.alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
-
-
-wb.save(working_folder + 'wac_fails_summary.xlsx')   
-'''
 #-----------section to create .plo for plotting the wac fails------------------
 
 # param.plo is used as template to create the wac_fails.plo
@@ -243,10 +218,10 @@ spl_path = working_folder+shortLot+'_FINAFWETFWET_AUTO.SPL.CSV'
 df_rep.iloc[0,2] = spl_path
 
 config_folder = working_folder.split(shortLot+"\\")[0] + '_Config\\'
-lim_path = glob.glob(config_folder + Product_ID + '*.lim.csv')[0]
+lim_path = glob.glob(config_folder + '*.lim.csv')[0]
 df_rep.iloc[1,2] = lim_path
 
 df_rep.to_csv(working_folder+ shortLot +'_wac_fails.rep.csv', index=False)
 
-print("The links to the correct limit file and the splitfile in the .rep need to be checked!!!")
+print("For MPW lots, you would need to change the limit file in the .rep to match to the correct Product ID.\nYou might need to modify the splitsheet if the report is for a child lot!")
     
