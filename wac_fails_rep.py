@@ -4,7 +4,7 @@ This code is used to create .rep file for WAC fails reporting.
 The code works for one or multiple child lots.
 The WAC fails csv files (one csv file for each child lot) are obtained from LOBETO: FAILS ONLY->EXPORT XLS
 The csv files have their default names starting by 'table.csv'. Do not change the name, just place them in the waferworkspace folder, i.e \\vdrsfile5\wafersworkspace$\22FDSOI\Product\Lot\
-
+Lobeto: http://t1onlinev//lobeto3/index.php?mod=disposition&op=details&family_lot_id=URBY03001.000&lot_id=URBY03001.000&operation=FINA-FWET.01&insertion=FWET
 A splitsheet from EASI exported as 'DCUBE' format is also needed. This is normally exported automatically from EASI to this folder: \\drsfile5\wafersworkspace$\_automation\EASIsplitsD3\
 """
 import glob
