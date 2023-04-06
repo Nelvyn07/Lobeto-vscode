@@ -13,9 +13,6 @@ from pptx import Presentation
 from pptx.util import Inches, Pt
 from pptx.dml.color import RGBColor
 from openpyxl import load_workbook
-import webbrowser
-import subprocess
-import time
 
 working_folder = input('Enter your working folder: ')
 # the working folder is like this \\vdrsfile5\wafersworkspace$\22FDSOI\Product\Lot\
