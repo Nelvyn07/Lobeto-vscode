@@ -13,11 +13,19 @@ from pptx import Presentation
 from pptx.util import Inches, Pt
 from pptx.dml.color import RGBColor
 from openpyxl import load_workbook
+import webbrowser
+import subprocess
+import time
 
 working_folder = input('Enter your working folder: ')
 # the working folder is like this \\vdrsfile5\wafersworkspace$\22FDSOI\Product\Lot\
-shortLot = working_folder.split("\\")[-1]
 working_folder = working_folder+"\\"
+shortLot = working_folder.split("\\")[-2]
+
+url = 'http://t1onlinev//lobeto3/index.php?mod=disposition&op=details&family_lot_id='+shortLot+'.000&lot_id='+shortLot+'.000&operation=FINA-FWET.01&insertion=FWET'
+print('Lobeto link:\n'+url)
+
+input("Did you place the lobeto wac fails tables in the working folder? ")
 
 splitsheet_folder = '\\\\vdrsfile5\\wafersworkspace$\\_automation\\EASIsplitsD3\\'
 
@@ -33,8 +41,8 @@ df_list = []
 
 # Loop through each CSV file and read it into a dataframe, then append it to the list. df_list is a list of dataframes.
 for filename in csv_files:
-    df = pd.read_csv(filename, error_bad_lines=False)
-    #df = pd.read_csv(filename, on_bad_lines='skip')
+    #df = pd.read_csv(filename, error_bad_lines=False)
+    df = pd.read_csv(filename, on_bad_lines='skip')
     #df = df[~df['FLOW'].str.contains('Pass')] #removed the rows containing Pass.
     df_list.append(df)
 
