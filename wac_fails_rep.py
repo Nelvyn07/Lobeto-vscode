@@ -14,20 +14,24 @@ from pptx import Presentation
 from pptx.util import Inches, Pt
 from pptx.dml.color import RGBColor
 from openpyxl import load_workbook
+import webbrowser
+import time
 
 # Define the scaling factor
 SCALE_FACTOR = 1
+
+def lobeto_link():
+    working_folder = folder_path_entry.get()
+    shortLot = working_folder.split("\\")[-1]
+    url = 'http://t1onlinev//lobeto3/index.php?mod=disposition&op=details&family_lot_id='+shortLot+'.000&lot_id='+shortLot+'.000&operation=FINA-FWET.01&insertion=FWET'
+    time.sleep(1)
+    webbrowser.open(url)
 
 def rep_creator():
     working_folder = folder_path_entry.get()
     # the working folder is like this \\vdrsfile5\wafersworkspace$\22FDSOI\Product\Lot
     working_folder = working_folder+"\\"
     shortLot = working_folder.split("\\")[-2]
-
-    url = 'http://t1onlinev//lobeto3/index.php?mod=disposition&op=details&family_lot_id='+shortLot+'.000&lot_id='+shortLot+'.000&operation=FINA-FWET.01&insertion=FWET'
-    print('Lobeto link:\n'+url)
-
-    input("Did you place the lobeto wac fails tables in the working folder? ")
 
     splitsheet_folder = '\\\\vdrsfile5\\wafersworkspace$\\_automation\\EASIsplitsD3\\'
 
@@ -36,13 +40,13 @@ def rep_creator():
     
 
     # List all CSV files in the current directory that start with 'lot'
-    csv_files = glob.glob(working_folder+'table*.csv')
+    wac_csv_files = glob.glob(working_folder+'table*.csv')
 
     # Create an empty list to store the dataframes
     df_list = []
 
     # Loop through each CSV file and read it into a dataframe, then append it to the list. df_list is a list of dataframes.
-    for filename in csv_files:
+    for filename in wac_csv_files:
         #df = pd.read_csv(filename, error_bad_lines=False)
         df = pd.read_csv(filename, on_bad_lines='skip')
         #df = df[~df['FLOW'].str.contains('Pass')] #removed the rows containing Pass.
@@ -71,13 +75,9 @@ def rep_creator():
     #shortLot = dcube['INIT_FAB_LOT'][0].split('.')[0]
 
     # extract the string between parentheses and join the strings for the wafers which are composed of more than one split information, e.g FF, APMOM
-    dcube['SPLIT'] = dcube['SPLIT'].apply(lambda s: s[s.find("(")+1:s.find(")")])
     dcube = dcube.groupby("WAFER_NUMBER")["SPLIT"].apply(lambda x: ", ".join(x.astype(str))).reset_index()
     dcube['WAFER_NUMBER'] = dcube['WAFER_NUMBER'].apply(lambda x: int(x))
-
-    dcube['SPLIT'] = dcube.apply(lambda y :"FF" if y['SPLIT']=="FastFast STD 1.5sig" else "FS" if y['SPLIT']=="FastSlow 0.5sig" 
-                                        else "SF" if y['SPLIT']=="SlowFast 0.5sig" else "SS" if y['SPLIT']=="SlowSlow STD 1.5sig" else y['SPLIT'], axis=1)
-                                        
+                                       
     df_merged = pd.merge(df, dcube, on= 'WAFER_NUMBER')
 
     # Set the 'WAFER_NUMBER' column as the index of df_merged and sort the rows by index
@@ -233,7 +233,7 @@ def rep_creator():
 
     df_rep.to_csv(working_folder+ shortLot +'_wac_fails.rep.csv', index=False)
 
-    rep_label.config(text="The .rep file has been created.\nFor MPW lots, you might need to change the limit file in the .rep to match to the correct Product ID.\nYou might need to modify the splitsheet if the report is for a child lot!", font=("TkDefaultFont", int(10*SCALE_FACTOR)), foreground="blue")
+    rep_label.config(text="The .rep file has been created. \nFor MPW lots, you might need to change the limit file in the .rep to match to the correct Product ID.\nYou might need to modify the splitsheet if the report is for a child lot.", font=("TkDefaultFont", int(10*SCALE_FACTOR)), foreground="green")
         
 
 # Create the main window
@@ -241,22 +241,38 @@ window = tk.Tk()
 window.title("rep file creator for WAC fails")
 
 # Create the folder_path input field
-folder_path = tk.Label(window, text="Enter the working folder path in the format \\vdrsfile5\wafersworkspace$\22FDSOI\Product\Lot : ", font=("TkDefaultFont", int(10*SCALE_FACTOR)))
-folder_path.pack()
-folder_path_entry = tk.Entry(window, font=("TkDefaultFont", int(10*SCALE_FACTOR)), width=int(20*SCALE_FACTOR))
-folder_path_entry.pack()
+folder_path_label = tk.Label(window, text="Enter the working folder path in the format \\\\vdrsfile5\wafersworkspace$\\22FDSOI\Product\Lot : ", font=("TkDefaultFont", int(10*SCALE_FACTOR)))
+#folder_path.pack()
+folder_path_entry = tk.Entry(window, font=("TkDefaultFont", int(10*SCALE_FACTOR)), width=int(50*SCALE_FACTOR))
+#folder_path_entry.pack()
+
+lobeto_label = tk.Label(window, text="Get the WAC fails csv files (one csv file for each child lot) from Lobeto: click on FAILS ONLY->EXPORT XLS). \nThe csv files have their default names starting by 'table.csv'. Do not change the name, just place them in the waferworkspace folder.\n If you have to plot the WAC fails on the mother lot (.000) only, you can directly get the link to Lobeto by clicking on the Lobeto link", font=("TkDefaultFont", int(10*SCALE_FACTOR)), foreground="blue")
+#wac_label.pack()
+
+# Create the button
+lobeto_button = tk.Button(window, text="Lobeto link", font=("TkDefaultFont", int(10*SCALE_FACTOR)), command=lobeto_link)
+#lob_button.pack()
+
 
 # Create the button
 rep_button = tk.Button(window, text="Create .rep", font=("TkDefaultFont", int(10*SCALE_FACTOR)), command=rep_creator)
-rep_button.pack()
+#rep_button.pack()
 
 # Create the rep output message
 rep_label = tk.Label(window, text="", font=("TkDefaultFont", int(10*SCALE_FACTOR)))
-rep_label.pack()
+#rep_label.pack()
+
+
+folder_path_label.grid(row=0, column=0)
+folder_path_entry.grid(row=1, column=0, pady=10)
+lobeto_label.grid(row=2, column=0, pady=10)
+lobeto_button.grid(row=2, column=1, padx=10)
+rep_button.grid(row=3, column=0, pady=10)
+rep_label.grid(row=4, column=0, pady=10)
 
 # Scale up the window dimensions
-window_width = int(400*SCALE_FACTOR)
-window_height = int(300*SCALE_FACTOR)
+window_width = int(1000*SCALE_FACTOR)
+window_height = int(400*SCALE_FACTOR)
 window.geometry(f"{window_width}x{window_height}")
 
 # Run the main loop
