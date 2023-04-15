@@ -36,7 +36,7 @@ def rep_creator():
     splitsheet_folder = '\\\\vdrsfile5\\wafersworkspace$\\_automation\\EASIsplitsD3\\'
 
     # Set the path to the folder containing the CSV files
-    template_path = '\\\\vdrsfile5\\wafersworkspace$\\22FDSOI\\Definition_ya\\lobeto\\' 
+    template_path = '\\\\vdrsfile5\\wafersworkspace$\\22FDSOI\\Definition_Corners\\lobeto\\' 
     
 
     # List all CSV files in the current directory that start with 'lot'
@@ -53,7 +53,13 @@ def rep_creator():
         df_list.append(df)
 
     # Concatenate all the dataframes into a single one
-    df = pd.concat(df_list)
+    try:
+        df = pd.concat(df_list)
+        WAC_fails_file_label.config(text="WAC fails table found in the working folder.", font=("TkDefaultFont", int(10*SCALE_FACTOR)), foreground="green")
+    except(ValueError):
+        WAC_fails_file_label.config(text="WAC fails table not found. Get WAC fails from Lobeto.", font=("TkDefaultFont", int(10*SCALE_FACTOR)), foreground="red")
+        return
+    
     df = df[~df['FLOW'].str.contains('Pass')] #removed the rows containing Pass.
 
     #delete all Unnamed Columns in a single code of line using regex
@@ -69,10 +75,14 @@ def rep_creator():
     df = df.rename(columns={'ID': 'WAFER_NUMBER'})
     df['WAFER_NUMBER'] = df['WAFER_NUMBER'].apply(lambda x: int(x)) #WAFER_NUM in df and dcube has to be in the same format: int works.
 
+    try:
+        Dcube_Split = glob.glob(splitsheet_folder+'Dcube_Split_' + shortLot + '*.csv')[0]
+        splitfile_label.config(text="Splitfile found in " + splitsheet_folder, font=("TkDefaultFont", int(10*SCALE_FACTOR)), foreground="green")       
+    except(IndexError):    
+        splitfile_label.config(text="No splitfile found.\nFill the EASI splitsheet, click on the  " + splitsheet_folder, font=("TkDefaultFont", int(10*SCALE_FACTOR)), foreground="red")
+        return
 
-    Dcube_Split = glob.glob(splitsheet_folder+'Dcube_Split_' + shortLot + '.csv')[0]
     dcube = pd.read_csv(Dcube_Split) 
-    #shortLot = dcube['INIT_FAB_LOT'][0].split('.')[0]
 
     # extract the string between parentheses and join the strings for the wafers which are composed of more than one split information, e.g FF, APMOM
     dcube = dcube.groupby("WAFER_NUMBER")["SPLIT"].apply(lambda x: ", ".join(x.astype(str))).reset_index()
@@ -110,7 +120,7 @@ def rep_creator():
     #-----------section to create .plo for plotting the wac fails------------------
 
     # param.plo is used as template to create the wac_fails.plo
-    df_plo = pd.read_csv(template_path+'param.plo.csv')
+    df_plo = pd.read_csv(template_path+'wac_fails.plo.csv')
 
     num_param = len(df_merged.columns)-2
 
@@ -190,7 +200,7 @@ def rep_creator():
         
         param = df_merged.columns[index+2]
         df1 = df_merged.loc[df_merged[param]=='WAC fail']
-        df1 = df1.groupby("SPLIT")["WAFER_NUMBER"].apply(lambda x: "&".join(x.astype(str)))
+        df1 = df1.groupby("SPLIT", group_keys=True)["WAFER_NUMBER"].apply(lambda x: "&".join(x.astype(str)))
 
         fails = dict(df1)
         line =[]
@@ -238,21 +248,25 @@ def rep_creator():
 
 # Create the main window
 window = tk.Tk()
-window.title("rep file creator for WAC fails")
+window.title("rep file creator for WAC fails on 22FDX corner lots")
 
 # Create the folder_path input field
 folder_path_label = tk.Label(window, text="Enter the working folder path in the format \\\\vdrsfile5\wafersworkspace$\\22FDSOI\Product\Lot : ", font=("TkDefaultFont", int(10*SCALE_FACTOR)))
 #folder_path.pack()
-folder_path_entry = tk.Entry(window, font=("TkDefaultFont", int(10*SCALE_FACTOR)), width=int(50*SCALE_FACTOR))
+folder_path_entry = tk.Entry(window, font=("TkDefaultFont", int(10*SCALE_FACTOR)), width=int(100*SCALE_FACTOR))
 #folder_path_entry.pack()
 
-lobeto_label = tk.Label(window, text="Get the WAC fails csv files (one csv file for each child lot) from Lobeto: click on FAILS ONLY->EXPORT XLS). \nThe csv files have their default names starting by 'table.csv'. Do not change the name, just place them in the waferworkspace folder.\n If you have to plot the WAC fails on the mother lot (.000) only, you can directly get the link to Lobeto by clicking on the Lobeto link", font=("TkDefaultFont", int(10*SCALE_FACTOR)), foreground="blue")
+lobeto_label = tk.Label(window, text="Get the WAC fails csv files (one csv file for each child lot) from Lobeto: click on FAILS ONLY->EXPORT XLS). \nThe csv files have their default names starting by 'table.csv'. Do not change the name, just place them in the waferworkspace folder.\n If you have to plot the WAC fails on the mother lot (.000) only, you can directly get the link to Lobeto by clicking on the Lobeto link.", font=("TkDefaultFont", int(10*SCALE_FACTOR)), foreground="blue")
 #wac_label.pack()
 
 # Create the button
-lobeto_button = tk.Button(window, text="Lobeto link", font=("TkDefaultFont", int(10*SCALE_FACTOR)), command=lobeto_link)
+lobeto_button = tk.Button(window, text="Lobeto website link \nto mother lot", font=("TkDefaultFont", int(10*SCALE_FACTOR)), command=lobeto_link)
 #lob_button.pack()
 
+WAC_fails_file_label = tk.Label(window, text="", font=("TkDefaultFont", int(10*SCALE_FACTOR)))
+#wac_label.pack()
+
+splitfile_label = tk.Label(window, text="", font=("TkDefaultFont", int(10*SCALE_FACTOR)))
 
 # Create the button
 rep_button = tk.Button(window, text="Create .rep", font=("TkDefaultFont", int(10*SCALE_FACTOR)), command=rep_creator)
@@ -268,7 +282,9 @@ folder_path_entry.grid(row=1, column=0, pady=10)
 lobeto_label.grid(row=2, column=0, pady=10)
 lobeto_button.grid(row=2, column=1, padx=10)
 rep_button.grid(row=3, column=0, pady=10)
-rep_label.grid(row=4, column=0, pady=10)
+WAC_fails_file_label.grid(row=4, column=0, pady=10)
+splitfile_label.grid(row=5, column=0, pady=10)
+rep_label.grid(row=6, column=0, pady=10)
 
 # Scale up the window dimensions
 window_width = int(1000*SCALE_FACTOR)
