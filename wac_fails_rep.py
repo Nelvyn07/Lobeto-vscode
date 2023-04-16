@@ -29,14 +29,13 @@ def lobeto_link():
 
 def rep_creator():
     working_folder = folder_path_entry.get()
-    # the working folder is like this \\vdrsfile5\wafersworkspace$\22FDSOI\Product\Lot
     working_folder = working_folder+"\\"
     shortLot = working_folder.split("\\")[-2]
 
     splitsheet_folder = '\\\\vdrsfile5\\wafersworkspace$\\_automation\\EASIsplitsD3\\'
 
     # Set the path to the folder containing the CSV files
-    template_path = '\\\\vdrsfile5\\wafersworkspace$\\22FDSOI\\Definition_Corners\\lobeto\\' 
+    template_path = '\\\\vdrsfile5\\wafersworkspace$\\22FDSOI\\Definition_Corners\\wac_fails_auto_report\\' 
     
 
     # List all CSV files in the current directory that start with 'lot'
@@ -57,7 +56,7 @@ def rep_creator():
         df = pd.concat(df_list)
         WAC_fails_file_label.config(text="WAC fails table found in the working folder.", font=("TkDefaultFont", int(10*SCALE_FACTOR)), foreground="green")
     except(ValueError):
-        WAC_fails_file_label.config(text="WAC fails table not found. Get WAC fails from Lobeto.", font=("TkDefaultFont", int(10*SCALE_FACTOR)), foreground="red")
+        WAC_fails_file_label.config(text="Folder path not correct or WAC fails table not found. Get WAC fails from Lobeto.", font=("TkDefaultFont", int(10*SCALE_FACTOR)), foreground="red")
         return
     
     df = df[~df['FLOW'].str.contains('Pass')] #removed the rows containing Pass.
@@ -119,8 +118,13 @@ def rep_creator():
 
     #-----------section to create .plo for plotting the wac fails------------------
 
-    # param.plo is used as template to create the wac_fails.plo
-    df_plo = pd.read_csv(template_path+'wac_fails.plo.csv')
+    try:
+        # param.plo is used as template to create the wac_fails.plo
+        df_plo = pd.read_csv(template_path+'wac_fails.plo.csv')
+        template_label.config(text="")
+    except(FileNotFoundError):
+        template_label.config(text="Template files not found. Check that the path "+ template_path + " has not been moved or renamed.\n It is recommended not to change the .pot template as issues with the auto comments could happen." , font=("TkDefaultFont", int(10*SCALE_FACTOR)), foreground="red")
+        return
 
     num_param = len(df_merged.columns)-2
 
@@ -217,7 +221,7 @@ def rep_creator():
             para.font.name = "Arial"
             para.font.size = Pt(18) 
     
-        
+    # to remove the empty template slide    
     xml_slides = prs.slides._sldIdLst  
     slides = list(xml_slides)
     xml_slides.remove(slides[2])
@@ -243,48 +247,45 @@ def rep_creator():
 
     df_rep.to_csv(working_folder+ shortLot +'_wac_fails.rep.csv', index=False)
 
-    rep_label.config(text="The .rep file has been created. \nFor MPW lots, you might need to change the limit file in the .rep to match to the correct Product ID.\nYou might need to modify the splitsheet if the report is for a child lot.", font=("TkDefaultFont", int(10*SCALE_FACTOR)), foreground="green")
+    rep_label.config(text="The .rep file has been created. \nFor MPW lots, you might need to change the limit file in the .rep to match to the correct Product ID.\nYou might need to modify the splitsheet if the report is for subset of wafers in a child lot.", font=("TkDefaultFont", int(10*SCALE_FACTOR)), foreground="green")
         
 
 # Create the main window
 window = tk.Tk()
-window.title("rep file creator for WAC fails on 22FDX corner lots")
+window.title("rep file creator for WAC fails at FWET on 22FDX corner lots")
 
 # Create the folder_path input field
 folder_path_label = tk.Label(window, text="Enter the working folder path in the format \\\\vdrsfile5\wafersworkspace$\\22FDSOI\Product\Lot : ", font=("TkDefaultFont", int(10*SCALE_FACTOR)))
-#folder_path.pack()
+
 folder_path_entry = tk.Entry(window, font=("TkDefaultFont", int(10*SCALE_FACTOR)), width=int(100*SCALE_FACTOR))
-#folder_path_entry.pack()
 
 lobeto_label = tk.Label(window, text="Get the WAC fails csv files (one csv file for each child lot) from Lobeto: click on FAILS ONLY->EXPORT XLS). \nThe csv files have their default names starting by 'table.csv'. Do not change the name, just place them in the waferworkspace folder.\n If you have to plot the WAC fails on the mother lot (.000) only, you can directly get the link to Lobeto by clicking on the Lobeto link.", font=("TkDefaultFont", int(10*SCALE_FACTOR)), foreground="blue")
-#wac_label.pack()
 
 # Create the button
 lobeto_button = tk.Button(window, text="Lobeto website link \nto mother lot", font=("TkDefaultFont", int(10*SCALE_FACTOR)), command=lobeto_link)
-#lob_button.pack()
 
 WAC_fails_file_label = tk.Label(window, text="", font=("TkDefaultFont", int(10*SCALE_FACTOR)))
-#wac_label.pack()
 
 splitfile_label = tk.Label(window, text="", font=("TkDefaultFont", int(10*SCALE_FACTOR)))
 
+template_label = tk.Label(window, text="", font=("TkDefaultFont", int(10*SCALE_FACTOR)))
+
 # Create the button
 rep_button = tk.Button(window, text="Create .rep", font=("TkDefaultFont", int(10*SCALE_FACTOR)), command=rep_creator)
-#rep_button.pack()
 
 # Create the rep output message
 rep_label = tk.Label(window, text="", font=("TkDefaultFont", int(10*SCALE_FACTOR)))
-#rep_label.pack()
 
 
 folder_path_label.grid(row=0, column=0)
-folder_path_entry.grid(row=1, column=0, pady=10)
-lobeto_label.grid(row=2, column=0, pady=10)
+folder_path_entry.grid(row=1, column=0, pady=10*SCALE_FACTOR)
+lobeto_label.grid(row=2, column=0, pady=10*SCALE_FACTOR)
 lobeto_button.grid(row=2, column=1, padx=10)
-rep_button.grid(row=3, column=0, pady=10)
-WAC_fails_file_label.grid(row=4, column=0, pady=10)
-splitfile_label.grid(row=5, column=0, pady=10)
-rep_label.grid(row=6, column=0, pady=10)
+rep_button.grid(row=3, column=0, pady=10*SCALE_FACTOR)
+WAC_fails_file_label.grid(row=4, column=0, pady=10*SCALE_FACTOR)
+splitfile_label.grid(row=5, column=0, pady=10*SCALE_FACTOR)
+template_label.grid(row=6, column=0, pady=10*SCALE_FACTOR)
+rep_label.grid(row=6, column=0, pady=10*SCALE_FACTOR)
 
 # Scale up the window dimensions
 window_width = int(1000*SCALE_FACTOR)
