@@ -1,4 +1,5 @@
 import tkinter as tk
+import customtkinter
 import webbrowser
 import time
 import glob
@@ -10,47 +11,59 @@ from openpyxl import load_workbook
 import requests
 import xml.etree.ElementTree as ET
 
+customtkinter.set_appearance_mode("dark")  # Modes: system (default), light, dark
+customtkinter.set_default_color_theme("green")  # Themes: blue (default), dark-blue, green
+
 SCALE_FACTOR = 1
 
-class MainWindow:
-    def __init__(self, master):
-        self.master = master
-        master.title("Tasks Automation for 22FDX corner lots")
+class App(customtkinter.CTk):
+    def __init__(self):
+        super().__init__()
+        self.title("Tasks automation for 22FDX corner lots")
+        self.geometry(f"{400}x{200}")
 
-        self.first_button = tk.Button(master, text="WAC fails", font=("TkDefaultFont", int(20*SCALE_FACTOR)), command=self.open_first_window)
-        self.first_button.pack()
+        self.first_button = customtkinter.CTkButton(self, text="WAC fails", font=customtkinter.CTkFont(size=20, weight="bold"), command=self.open_first_window)
+        self.first_button.pack(padx=10*SCALE_FACTOR, pady=20*SCALE_FACTOR)
 
-        self.second_button = tk.Button(master, text="XML for ERFs", font=("TkDefaultFont", int(20*SCALE_FACTOR)), command=self.open_second_window)
-        self.second_button.pack()
-        # Scale up the window dimensions
-        self.master_width = int(400*SCALE_FACTOR)
-        self.master_height = int(200*SCALE_FACTOR)
-        self.master.geometry(f"{self.master_width}x{self.master_height}")
+        self.second_button = customtkinter.CTkButton(self, text="XML for ERFs", font=customtkinter.CTkFont(size=20, weight="bold"), command=self.open_second_window)
+        self.second_button.pack(padx=10*SCALE_FACTOR, pady=10*SCALE_FACTOR)
+
+
 
     def open_first_window(self):
-        self.first_window = tk.Toplevel(self.master)
+        self.first_window = customtkinter.CTkToplevel(self.master)
         self.first_window.title("rep file creator for WAC fails at FWET on 22FDX corner lots")
+        # Scale up the window dimensions
+        """
+        self.first_window_width = int(1200*SCALE_FACTOR)
+        self.first_window_height = int(500*SCALE_FACTOR)
+        self.first_window.geometry(f"{self.first_window_width}x{self.first_window_height}")
+        """
+        self.first_window.geometry("+%d+%d" % (self.winfo_rootx() + self.winfo_width(), self.winfo_rooty()))
+        # The "+%d+%d" specifies the x and y coordinates for the top-left corner of the window.
+        # We calculate these coordinates based on the root window's position and width.
+
         # Create the folder_path input field
-        self.folder_path_label = tk.Label(self.first_window, text="Enter the working folder path in the format \\\\vdrsfile5\wafersworkspace$\\22FDSOI\Product\Lot : ", font=("TkDefaultFont", int(10*SCALE_FACTOR)))
+        self.folder_path_label = customtkinter.CTkLabel(self.first_window, text="Enter the working folder path in the format \\\\vdrsfile5\wafersworkspace$\\22FDSOI\Product\Lot : ", font=customtkinter.CTkFont(size=20, weight="normal"))
 
-        self.folder_path_entry = tk.Entry(self.first_window, font=("TkDefaultFont", int(10*SCALE_FACTOR)), width=int(100*SCALE_FACTOR))
+        self.folder_path_entry = customtkinter.CTkEntry(self.first_window, font=customtkinter.CTkFont(size=20, weight="normal"), width=int(800*SCALE_FACTOR))
 
-        self.lobeto_label = tk.Label(self.first_window, text="Get the WAC fails csv files (one csv file for each child lot) from Lobeto: click on FAILS ONLY->EXPORT XLS). \nThe csv files have their default names starting by 'table.csv'. Do not change the name, just place them in the waferworkspace folder.\n If you have to plot the WAC fails on the mother lot (.000) only, you can directly get the link to Lobeto by clicking on the Lobeto link.", font=("TkDefaultFont", int(10*SCALE_FACTOR)), foreground="blue")
-
-        # Create the button
-        self.lobeto_button = tk.Button(self.first_window, text="Lobeto website link \nto mother lot", font=("TkDefaultFont", int(10*SCALE_FACTOR)), command=self.lobeto_link)
-
-        self.WAC_fails_file_label = tk.Label(self.first_window, text="", font=("TkDefaultFont", int(10*SCALE_FACTOR)))
-
-        self.splitfile_label = tk.Label(self.first_window, text="", font=("TkDefaultFont", int(10*SCALE_FACTOR)))
-
-        self.template_label = tk.Label(self.first_window, text="", font=("TkDefaultFont", int(10*SCALE_FACTOR)))
+        self.lobeto_label = customtkinter.CTkLabel(self.first_window, text="Get the WAC fails csv files (one csv file for each child lot) from Lobeto: click on FAILS ONLY->EXPORT XLS). \nThe csv files have their default names starting by 'table.csv'. Do not change the name, just place them in the waferworkspace folder.\n If you have to plot the WAC fails on the mother lot (.000) only, you can directly get the link to Lobeto by clicking on the Lobeto link.", font=customtkinter.CTkFont(size=20, weight="normal"), fg_color="blue")
 
         # Create the button
-        self.rep_button = tk.Button(self.first_window, text="Create .rep", font=("TkDefaultFont", int(10*SCALE_FACTOR)), command=self.rep_creator)
+        self.lobeto_button = customtkinter.CTkButton(self.first_window, text="Lobeto website link \nto mother lot", font=customtkinter.CTkFont(size=20, weight="normal"), command=self.lobeto_link)
+
+        self.WAC_fails_file_label = customtkinter.CTkLabel(self.first_window, text="", font=customtkinter.CTkFont(size=20, weight="normal"))
+
+        self.splitfile_label = customtkinter.CTkLabel(self.first_window, text="", font=customtkinter.CTkFont(size=20, weight="normal"))
+
+        self.template_label = customtkinter.CTkLabel(self.first_window, text="", font=customtkinter.CTkFont(size=20, weight="normal"))
+
+        # Create the button
+        self.rep_button = customtkinter.CTkButton(self.first_window, text="Create .rep", font=customtkinter.CTkFont(size=20, weight="normal"), command=self.rep_creator)
 
         # Create the rep output message
-        self.rep_label = tk.Label(self.first_window, text="", font=("TkDefaultFont", int(10*SCALE_FACTOR)))
+        self.rep_label = customtkinter.CTkLabel(self.first_window, text="", font=customtkinter.CTkFont(size=20, weight="normal"))
        
 
         self.folder_path_label.grid(row=0, column=0)
@@ -63,57 +76,53 @@ class MainWindow:
         self.template_label.grid(row=6, column=0, pady=10*SCALE_FACTOR)
         self.rep_label.grid(row=6, column=0, pady=10*SCALE_FACTOR)
 
-        # Scale up the window dimensions
-        self.first_window_width = int(1000*SCALE_FACTOR)
-        self.first_window_height = int(400*SCALE_FACTOR)
-        self.first_window.geometry(f"{self.first_window_width}x{self.first_window_height}")
 
     def open_second_window(self):
-        self.second_window = tk.Toplevel(self.master)
+        self.second_window = customtkinter.CTkToplevel(self.master)
         self.second_window.title("EASI to XML for 22FDX corner ERFs")
 
         # Create the user id input field
-        self.user_id_label = tk.Label(self.second_window, text="User ID:", font=("TkDefaultFont", int(10*SCALE_FACTOR)))
+        self.user_id_label = customtkinter.CTkLabel(self.second_window, text="User ID:", font=customtkinter.CTkFont(size=20, weight="normal"))
         self.user_id_label.pack()
-        self.user_id_entry = tk.Entry(self.second_window, font=("TkDefaultFont", int(10*SCALE_FACTOR)), width=int(20*SCALE_FACTOR))
+        self.user_id_entry = customtkinter.CTkEntry(self.second_window, font=customtkinter.CTkFont(size=20, weight="normal"), width=int(200*SCALE_FACTOR))
         self.user_id_entry.insert(0, "yandee")
-        self.user_id_entry.pack()
+        self.user_id_entry.pack(pady=10*SCALE_FACTOR)
 
         # Create the password input field
-        self.password_label = tk.Label(self.second_window, text="Password:", font=("TkDefaultFont", int(10*SCALE_FACTOR)))
+        self.password_label = customtkinter.CTkLabel(self.second_window, text="Password:", font=customtkinter.CTkFont(size=20, weight="normal"))
         self.password_label.pack()
-        self.password_entry = tk.Entry(self.second_window, font=("TkDefaultFont", int(10*SCALE_FACTOR)), width=int(20*SCALE_FACTOR), show="*")
-        self.password_entry.insert(0, "Homeoffice30")
-        self.password_entry.pack()
+        self.password_entry = customtkinter.CTkEntry(self.second_window, font=customtkinter.CTkFont(size=20, weight="normal"), width=int(200*SCALE_FACTOR), show="*")
+        self.password_entry.insert(0, "")
+        self.password_entry.pack(pady=10*SCALE_FACTOR)
 
         # Create the show password checkbutton
         self.show_password = tk.BooleanVar()
         self.show_password.set(False)
-        self.show_password_checkbutton = tk.Checkbutton(self.second_window, text="Show password", variable=self.show_password, font=("TkDefaultFont", int(10*SCALE_FACTOR)), command=self.toggle_password_visibility)
-        self.show_password_checkbutton.pack()
+        self.show_password_checkbutton = tk.Checkbutton(self.second_window, text="Show password", variable=self.show_password, font=customtkinter.CTkFont(size=20, weight="normal"), command=self.toggle_password_visibility)
+        self.show_password_checkbutton.pack(pady=10*SCALE_FACTOR)
 
 
         # Create the correct/incorrect password label
-        self.password_validity_label = tk.Label(self.second_window, text="", font=("TkDefaultFont", int(10*SCALE_FACTOR)))
-        self.password_validity_label.pack()
+        self.password_validity_label = customtkinter.CTkLabel(self.second_window, text="", font=customtkinter.CTkFont(size=20, weight="normal"))
+        self.password_validity_label.pack(pady=10*SCALE_FACTOR)
 
         # Create the erf_id input field
-        self.erf_id_label = tk.Label(self.second_window, text="Enter the EASI ErfID:", font=("TkDefaultFont", int(10*SCALE_FACTOR)))
-        self.erf_id_label.pack()
-        self.erf_id_entry = tk.Entry(self.second_window, font=("TkDefaultFont", int(10*SCALE_FACTOR)), width=int(20*SCALE_FACTOR))
-        self.erf_id_entry.pack()
+        self.erf_id_label = customtkinter.CTkLabel(self.second_window, text="Enter the EASI ErfID:", font=customtkinter.CTkFont(size=20, weight="normal"))
+        self.erf_id_label.pack(pady=10*SCALE_FACTOR)
+        self.erf_id_entry = customtkinter.CTkEntry(self.second_window, font=customtkinter.CTkFont(size=20, weight="normal"), width=int(200*SCALE_FACTOR))
+        self.erf_id_entry.pack(pady=10*SCALE_FACTOR)
 
         # Create the button
-        self.XML_button = tk.Button(self.second_window, text="XML", font=("TkDefaultFont", int(10*SCALE_FACTOR)), command=self.easi_to_xml)
-        self.XML_button.pack()
+        self.XML_button = customtkinter.CTkButton(self.second_window, text="XML", font=customtkinter.CTkFont(size=20, weight="normal"), command=self.easi_to_xml)
+        self.XML_button.pack(pady=10*SCALE_FACTOR)
 
         # Create the XML label
-        self.XML_label = tk.Label(self.second_window, text="", font=("TkDefaultFont", int(10*SCALE_FACTOR)))
-        self.XML_label.pack()
+        self.XML_label = customtkinter.CTkLabel(self.second_window, text="", font=customtkinter.CTkFont(size=20, weight="normal"))
+        self.XML_label.pack(pady=10*SCALE_FACTOR)
 
         # Scale up the window dimensions
-        self.second_window_width = int(400*SCALE_FACTOR)
-        self.second_window_height = int(300*SCALE_FACTOR)
+        self.second_window_width = int(500*SCALE_FACTOR)
+        self.second_window_height = int(500*SCALE_FACTOR)
         self.second_window.geometry(f"{self.second_window_width}x{self.second_window_height}")
 
 
@@ -151,9 +160,9 @@ class MainWindow:
         # Concatenate all the dataframes into a single one
         try:
             df = pd.concat(df_list)
-            self.WAC_fails_file_label.config(text="WAC fails table found in the working folder.", font=("TkDefaultFont", int(10*SCALE_FACTOR)), foreground="green")
+            self.WAC_fails_file_label.configure(text="WAC fails table found in the working folder.", font=customtkinter.CTkFont(size=20, weight="normal"), fg_color="green")
         except(ValueError):
-            self.WAC_fails_file_label.config(text="Folder path not correct or WAC fails table not found. Get WAC fails from Lobeto.", font=("TkDefaultFont", int(10*SCALE_FACTOR)), foreground="red")
+            self.WAC_fails_file_label.configure(text="Folder path not correct or WAC fails table not found. Get WAC fails from Lobeto.", font=customtkinter.CTkFont(size=20, weight="normal"), fg_color="red")
             return
         
         df = df[~df['FLOW'].str.contains('Pass')] #removed the rows containing Pass.
@@ -173,9 +182,9 @@ class MainWindow:
 
         try:
             Dcube_Split = glob.glob(splitsheet_folder+'Dcube_Split_' + shortLot + '*.csv')[0]
-            self.splitfile_label.config(text="Splitfile found in " + splitsheet_folder, font=("TkDefaultFont", int(10*SCALE_FACTOR)), foreground="green")       
+            self.splitfile_label.configure(text="Splitfile found in " + splitsheet_folder, font=customtkinter.CTkFont(size=20, weight="normal"), fg_color="green")       
         except(IndexError):    
-            self.splitfile_label.config(text="No splitfile found.\nFill the EASI splitsheet, click on the  " + splitsheet_folder, font=("TkDefaultFont", int(10*SCALE_FACTOR)), foreground="red")
+            self.splitfile_label.configure(text="No splitfile found.\nFill the EASI splitsheet, click on the  " + splitsheet_folder, font=customtkinter.CTkFont(size=20, weight="normal"), fg_color="red")
             return
 
         dcube = pd.read_csv(Dcube_Split) 
@@ -218,9 +227,9 @@ class MainWindow:
         try:
             # param.plo is used as template to create the wac_fails.plo
             df_plo = pd.read_csv(template_path+'wac_fails.plo.csv')
-            self.template_label.config(text="")
+            self.template_label.configure(text="")
         except(FileNotFoundError):
-            self.template_label.config(text="Template files not found. Check that the path "+ template_path + " has not been moved or renamed.\n It is recommended not to change the .pot template as issues with the auto comments could happen." , font=("TkDefaultFont", int(10*SCALE_FACTOR)), foreground="red")
+            self.template_label.configure(text="Template files not found. Check that the path "+ template_path + " has not been moved or renamed.\n It is recommended not to change the .pot template as issues with the auto comments could happen." , font=customtkinter.CTkFont(size=20, weight="normal"), fg_color="red")
             return
 
         num_param = len(df_merged.columns)-2
@@ -338,13 +347,13 @@ class MainWindow:
         spl_path = working_folder+shortLot+'_FINAFWETFWET_AUTO.SPL.CSV'
         df_rep.iloc[0,2] = spl_path
 
-        config_folder = working_folder.split(shortLot+"\\")[0] + '_Config\\'
+        config_folder = working_folder.split(shortLot+"\\")[0] + '_config\\'
         lim_path = glob.glob(config_folder + '*.lim.csv')[0]
         df_rep.iloc[1,2] = lim_path
 
         df_rep.to_csv(working_folder+ shortLot +'_wac_fails.rep.csv', index=False)
 
-        self.rep_label.config(text="The .rep file has been created. \nFor MPW lots, you might need to change the limit file in the .rep to match to the correct Product ID.\nYou might need to modify the splitsheet if the report is for subset of wafers in a child lot.", font=("TkDefaultFont", int(10*SCALE_FACTOR)), foreground="green")
+        self.rep_label.configure(text="The .rep file has been created. \nFor MPW lots, you might need to change the limit file in the .rep to match to the correct Product ID.\nYou might need to modify the splitsheet if the report is for subset of wafers in a child lot.", font=customtkinter.CTkFont(size=20, weight="normal"), fg_color="green")
             
     def easi_to_xml(self):
         erf_id = self.erf_id_entry.get()
@@ -365,9 +374,9 @@ class MainWindow:
             r = requests.get(url, proxies=proxies, auth=(user_id, passwd))
             xml_text = r.text
             xml_text = xml_text.split('SPLIT_INFO')[1]
-            self.password_validity_label.config(text="Correct password", font=("TkDefaultFont", int(10*SCALE_FACTOR)), foreground="blue")
+            self.password_validity_label.configure(text="Correct password", font=customtkinter.CTkFont(size=20, weight="normal"), fg_color="blue")
         except (IndexError, requests.exceptions.RequestException):
-            self.password_validity_label.config(text="Check password!!!", font=("TkDefaultFont", int(10*SCALE_FACTOR)), foreground="red")
+            self.password_validity_label.configure(text="Check password!!!", font=customtkinter.CTkFont(size=20, weight="normal"), fg_color="red")
             return
         
         xml_text = '<SPLIT_INFO' + xml_text + 'SPLIT_INFO>'
@@ -431,21 +440,17 @@ class MainWindow:
                     
         tree.write(folder_path + 'New.xml')
         
-        self.XML_label.config(text="The XML file has been created as New.xml", font=("TkDefaultFont", int(10*SCALE_FACTOR)), foreground="blue")
+        self.XML_label.configure(text="The XML file has been created as New.xml", font=customtkinter.CTkFont(size=20, weight="normal"), fg_color="blue")
 
 
 
     def toggle_password_visibility(self):
         if self.show_password.get():
-            self.password_entry.config(show="")
+            self.password_entry.configure(show="")
         else:
-            self.password_entry.config(show="*")
-
-root = tk.Tk()
-app = MainWindow(root)
-root.mainloop()
+            self.password_entry.configure(show="*")
 
 
-
-
+app = App()
+app.mainloop()
 
