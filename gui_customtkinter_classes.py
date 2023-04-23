@@ -16,115 +16,195 @@ customtkinter.set_default_color_theme("dark-blue")  # Themes: blue (default), da
 
 SCALE_FACTOR = 1
 
-class App(customtkinter.CTk):
+class EASI_TO_XML_WINDOW(customtkinter.CTkToplevel):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.title("Tasks automation for 22FDX corner lots")
-        self.geometry(f"{400}x{200}")
-
-        self.EASI_to_XML_button = customtkinter.CTkButton(self, text="XML for ERFs", font=customtkinter.CTkFont(size=20, weight="bold"), command=self.open_EASI_to_XML_window)
-        self.EASI_to_XML_button.pack(padx=10*SCALE_FACTOR, pady=10*SCALE_FACTOR)
-        self.EASI_to_XML_window = None
-
-        self.WAC_fails_button = customtkinter.CTkButton(self, text="WAC fails", font=customtkinter.CTkFont(size=20, weight="bold"), command=self.open_WAC_fails_window)
-        self.WAC_fails_button.pack(padx=10*SCALE_FACTOR, pady=20*SCALE_FACTOR)
-        self.WAC_fails_window = None
-
-
-
-    def open_EASI_to_XML_window(self):
-        if self.EASI_to_XML_window is None or not self.EASI_to_XML_window.winfo_exists():
-            self.EASI_to_XML_window = customtkinter.CTkToplevel(self)  # create window if its None or destroyed
-        else:
-            self.EASI_to_XML_window.focus()  # if window exists focus it
-
-        self.EASI_to_XML_window.title("EASI to XML for 22FDX corner ERFs")
-
-        # Scale up the window dimensions
-        self.EASI_to_XML_window_width = int(500*SCALE_FACTOR)
-        self.EASI_to_XML_window_height = int(500*SCALE_FACTOR)
-        self.EASI_to_XML_window.geometry(f"{self.EASI_to_XML_window_width}x{self.EASI_to_XML_window_height}")
-        self.EASI_to_XML_window.geometry("+%d+%d" % (self.winfo_rootx() + self.winfo_width(), self.winfo_rooty()+20))
+        self.title("EASI to XML for 22FDX corner ERFs")
+        self.geometry(f"{600}x{550}")
+        self.geometry("+500+100")
 
         # Create the user id input field
-        self.user_id_label = customtkinter.CTkLabel(self.EASI_to_XML_window, text="User ID:", font=customtkinter.CTkFont(size=20, weight="normal"))
+        self.user_id_label = customtkinter.CTkLabel(self, text="User ID:", font=customtkinter.CTkFont(size=20, weight="normal"))
         #self.user_id_label.pack()
-        self.user_id_entry = customtkinter.CTkEntry(self.EASI_to_XML_window, font=customtkinter.CTkFont(size=20, weight="normal"), width=int(200*SCALE_FACTOR))
+        self.user_id_entry = customtkinter.CTkEntry(self, font=customtkinter.CTkFont(size=20, weight="normal"), width=int(200*SCALE_FACTOR))
         self.user_id_entry.insert(0, "yandee")
         self.user_id_entry.pack(pady=10*SCALE_FACTOR)
 
         # Create the password input field
-        self.password_label = customtkinter.CTkLabel(self.EASI_to_XML_window, text="Password:", font=customtkinter.CTkFont(size=20, weight="normal"))
+        self.password_label = customtkinter.CTkLabel(self, text="Password:", font=customtkinter.CTkFont(size=20, weight="normal"))
         self.password_label.pack()
-        self.password_entry = customtkinter.CTkEntry(self.EASI_to_XML_window, font=customtkinter.CTkFont(size=20, weight="normal"), width=int(200*SCALE_FACTOR), show="*")
-        self.password_entry.insert(0, "")
+        self.password_entry = customtkinter.CTkEntry(self, font=customtkinter.CTkFont(size=20, weight="normal"), width=int(200*SCALE_FACTOR), show="*")
+        self.password_entry.insert(0, "Lastpassword31")
         self.password_entry.pack(pady=10*SCALE_FACTOR)
 
         # Create the show password checkbutton
         self.show_password = tk.BooleanVar()
         self.show_password.set(False)
-        self.show_password_checkbutton = tk.Checkbutton(self.EASI_to_XML_window, text="Show password", variable=self.show_password, font=customtkinter.CTkFont(size=20, weight="normal"), command=self.toggle_password_visibility)
+        self.show_password_checkbutton = tk.Checkbutton(self, text="Show password", variable=self.show_password, font=customtkinter.CTkFont(size=20, weight="normal"), command=self.toggle_password_visibility)
         self.show_password_checkbutton.pack(pady=10*SCALE_FACTOR)
 
         # Create the correct/incorrect password label
-        self.password_validity_label = customtkinter.CTkLabel(self.EASI_to_XML_window, text="", font=customtkinter.CTkFont(size=20, weight="normal"))
+        self.password_validity_label = customtkinter.CTkLabel(self, text="", font=customtkinter.CTkFont(size=14, weight="normal"))
         self.password_validity_label.pack(pady=10*SCALE_FACTOR)
 
         # Create the erf_id input field
-        self.erf_id_label = customtkinter.CTkLabel(self.EASI_to_XML_window, text="Enter the EASI ErfID:", font=customtkinter.CTkFont(size=20, weight="normal"))
+        self.erf_id_label = customtkinter.CTkLabel(self, text="Enter the EASI ErfID:", font=customtkinter.CTkFont(size=20, weight="normal"))
         self.erf_id_label.pack(pady=10*SCALE_FACTOR)
-        self.erf_id_entry = customtkinter.CTkEntry(self.EASI_to_XML_window, font=customtkinter.CTkFont(size=20, weight="normal"), width=int(200*SCALE_FACTOR))
+        self.erf_id_entry = customtkinter.CTkEntry(self, font=customtkinter.CTkFont(size=20, weight="normal"), width=int(200*SCALE_FACTOR))
         self.erf_id_entry.pack(pady=10*SCALE_FACTOR)
 
         # Create the button
-        self.XML_button = customtkinter.CTkButton(self.EASI_to_XML_window, text="XML", font=customtkinter.CTkFont(size=20, weight="normal"), command=self.easi_to_xml)
+        self.XML_button = customtkinter.CTkButton(self, text="XML", font=customtkinter.CTkFont(size=20, weight="normal"), command=self.easi_to_xml)
         self.XML_button.pack(pady=10*SCALE_FACTOR)
 
         # Create the XML label
-        self.XML_label = customtkinter.CTkLabel(self.EASI_to_XML_window, text="", font=customtkinter.CTkFont(size=20, weight="normal"))
+        self.XML_label = customtkinter.CTkLabel(self, text="", font=customtkinter.CTkFont(size=20, weight="normal"))
         self.XML_label.pack(pady=10*SCALE_FACTOR)
 
-    def open_WAC_fails_window(self):
-        if self.WAC_fails_window is None or not self.WAC_fails_window.winfo_exists():
-            self.WAC_fails_window = customtkinter.CTkToplevel(self)  # create window if its None or destroyed
-        else:
-            self.WAC_fails_window.focus()  # if window exists focus it
+        # Create the missing template label
+        self.missing_template_label = customtkinter.CTkLabel(self, text="", font=customtkinter.CTkFont(size=20, weight="normal"))
+        self.missing_template_label.pack(pady=10*SCALE_FACTOR)
+        
 
-        self.WAC_fails_window.title("rep file creator for WAC fails at FWET on 22FDX corner lots")
+    def easi_to_xml(self):
+        erf_id = self.erf_id_entry.get()
+
+        url = 'http://tecnet.gfoundries.com/easi/getAjax.php?Step=getsplit&erfid='+ erf_id
+        # using http because https causes SSLError
         
-        self.WAC_fails_window_width = int(1100*SCALE_FACTOR)
-        self.WAC_fails_window_height = int(500*SCALE_FACTOR)
-        self.WAC_fails_window.geometry(f"{self.WAC_fails_window_width}x{self.WAC_fails_window_height}")
+        proxies = {
+        "http": 'http://dewwwp1.gfoundries.com:74',
+        "https": 'http://dewwwp1.gfoundries.com:74',
+            }
+
+        passwd = self.password_entry.get()
+        user_id = self.user_id_entry.get()
         
-        self.WAC_fails_window.geometry("+%d+%d" % (self.winfo_rootx() + self.winfo_width(), self.winfo_rooty()))
-        # The "+%d+%d" specifies the x and y coordinates for the top-left corner of the window.
-        # We calculate these coordinates based on the root window's position and width.
+        
+        try:
+            r = requests.get(url, proxies=proxies, auth=(user_id, passwd))
+            xml_text = r.text
+            xml_text = xml_text.split('SPLIT_INFO')[1]
+            self.password_validity_label.configure(text="Correct password", font=customtkinter.CTkFont(size=14, weight="normal"), fg_color="blue")
+        except (IndexError, requests.exceptions.RequestException):
+            self.password_validity_label.configure(text="Check password or ERF ID!!!", font=customtkinter.CTkFont(size=14, weight="normal"), fg_color="red")
+            return
+        
+        xml_text = '<SPLIT_INFO' + xml_text + 'SPLIT_INFO>'
+        #Error if the texts before and after SPLIT_INFO are not removed
+
+        folder_path = '\\\\vdrsfile5\\wafersworkspace$\\22FDSOI\\Definition_Corners\\EASI_to_XML\\'
+        
+        try:
+            with open(folder_path + 'Raw.xml', 'w') as f:
+                f.write(xml_text)
+
+        except(FileNotFoundError):
+            self.missing_template_label.configure(self, text="Template files not found.\nCheck that the path "+ folder_path + " has not been moved or renamed." , font=customtkinter.CTkFont(size=14, weight="normal"), fg_color="red")
+            self.missing_template_label.pack(pady=10*SCALE_FACTOR)
+            return
+
+        tree = ET.parse(folder_path + 'Raw.xml')
+        root_raw = tree.getroot()
+        
+        main_route = root_raw[0].text
+        #main route information is needed as it changes from Product to Product and is required for the import in the ERF.
+        
+        split_info = []
+        for instance in root_raw.iter('SPLIT_INSTANCEID'):
+            process = instance[0].text.split(sep = '-', maxsplit =1)[0] # to get LW,XW,3PL and SPK
+            for spl_grp in instance.iter('SPLIT_GROUP'):
+                split = process + ':'+ spl_grp.attrib['splitShort']
+                for waf in spl_grp:
+                    wafers = split + ':' + waf.text
+                    split_info.append(wafers)
+        
+        df = pd.DataFrame(split_info)
+        df.columns = ['Raw']
+        #There are some rows which are missing ';' at the end. This causes an issue when we have to concatenate the wafers. 
+        #The ~ operator is used to invert the boolean mask so that it selects the rows that do not end with ;
+        mask = ~df['Raw'].str.endswith(';') 
+        df.loc[mask, 'Raw'] = df.loc[mask, 'Raw'] + ';'
+        df['PD'] = df['Raw'].str.split(':', expand =True)[0]
+        df['Corner'] = df['Raw'].str.split(':', expand =True)[1]
+        df['Wafers'] = df['Raw'].str.split(':', expand =True)[2]
+        
+        SS_row = df.loc[(df['PD']=='SPIK') & (df['Corner'] =='SS_1.5S')]
+        FF_row = df.loc[(df['PD']=='SPIK') & (df['Corner'] =='FF_1.5S')]
+        rows_985C = df.loc[(df['PD']=='3PL') & (df['Corner'] !='SS_1.5S') & (df['Corner'] !='FF_1.5S')] 
+        
+        SS_wafers = SS_row.iloc[0][-1] # Wafer assignment is the last column
+        FF_wafers = FF_row.iloc[0][-1]
+        other_wafers = ''.join(rows_985C['Wafers']) #concatenate all rows in the 'Wafers' column
+        
+        tree = ET.parse(folder_path + 'new_3PL+10C\\' +'Template.xml')
+        root_new = tree.getroot()
+        
+        root_new[0].text = main_route
+        
+        for spl_grp in root_new.iter('SPLIT_GROUP'):
+            if spl_grp.attrib['splitShort'] == 'SS_1.5S':
+                for waf in spl_grp:
+                    waf.text = SS_wafers
+                    
+            elif spl_grp.attrib['splitShort'] == 'FF_1.5S':
+                for waf in spl_grp:
+                    waf.text = FF_wafers
+        
+            elif spl_grp.attrib['splitShort'] == '985C':
+                for waf in spl_grp:
+                    waf.text = other_wafers
+                    
+        tree.write(folder_path + 'New.xml')
+        
+        self.XML_label.configure(text="The XML file has been created.", font=customtkinter.CTkFont(size=14, weight="normal"), fg_color="blue")
+        self.xml_textbox = customtkinter.CTkTextbox(self, width=550, height=50)
+        self.xml_textbox.insert("0.0", "In SplitSheet tab of your ERF, import from XML:\n"+ folder_path + "New.xml")
+        self.xml_textbox.configure(font=('Helvetica', 14), state="disabled")
+        self.xml_textbox.pack()
+
+
+    def toggle_password_visibility(self):
+        if self.show_password.get():
+            self.password_entry.configure(show="")
+        else:
+            self.password_entry.configure(show="*")
+
+
+
+class WAC_FAILS_REP_WINDOW(customtkinter.CTkToplevel):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs) 
+        self.title("rep file creator for WAC fails at FWET on 22FDX corner lots")
+        self.geometry(f"{1100}x{500}")
+        self.geometry("+500+200") #top left corner distance
+
 
         # Create the folder_path input field
-        self.folder_path_label = customtkinter.CTkLabel(self.WAC_fails_window, text="Enter the working folder path in the format \\\\vdrsfile5\wafersworkspace$\\22FDSOI\Product\Lot : ", font=customtkinter.CTkFont(size=20, weight="normal"))
+        self.folder_path_label = customtkinter.CTkLabel(self, text="Enter the working folder path in the format \\\\vdrsfile5\wafersworkspace$\\22FDSOI\Product\Lot : ", font=customtkinter.CTkFont(size=20, weight="normal"))
 
-        self.folder_path_entry = customtkinter.CTkEntry(self.WAC_fails_window, font=customtkinter.CTkFont(size=20, weight="normal"), width=int(900*SCALE_FACTOR))
+        self.folder_path_entry = customtkinter.CTkEntry(self, font=customtkinter.CTkFont(size=20, weight="normal"), width=int(900*SCALE_FACTOR))
 
-        self.wac_textbox = customtkinter.CTkTextbox(self.WAC_fails_window, width=900, height=100)
+        self.wac_textbox = customtkinter.CTkTextbox(self, width=900, height=100)
         self.wac_textbox.insert("0.0", "Get the WAC fails csv files (one csv file for each child lot) from Lobeto: click on FAILS ONLY->EXPORT XLS). \nThe csv files have their default names starting by 'table.csv'. Do not change the name, just place them in the waferworkspace folder.\n If you have to plot the WAC fails on the mother lot (.000) only, you can directly get the link to Lobeto by clicking on the Lobeto link.")
         self.wac_textbox.configure(font=('Helvetica', 14), state="disabled")
 
         # Create the button
-        self.lobeto_button = customtkinter.CTkButton(self.WAC_fails_window, text="Lobeto website link \nto mother lot", font=customtkinter.CTkFont(size=14, weight="normal"), command=self.lobeto_link)
+        self.lobeto_button = customtkinter.CTkButton(self, text="Lobeto website link \nto mother lot", font=customtkinter.CTkFont(size=14, weight="normal"), command=self.lobeto_link)
 
-        self.WAC_fails_file_label = customtkinter.CTkLabel(self.WAC_fails_window, text="")
+        self.WAC_fails_file_label = customtkinter.CTkLabel(self, text="")
 
-        self.splitfile_label = customtkinter.CTkLabel(self.WAC_fails_window, text="")
+        self.splitfile_label = customtkinter.CTkLabel(self, text="")
 
-        self.template_label = customtkinter.CTkLabel(self.WAC_fails_window, text="")
+        self.template_label = customtkinter.CTkLabel(self, text="")
 
-        self.limit_file_label = customtkinter.CTkLabel(self.WAC_fails_window, text="")
+        self.limit_file_label = customtkinter.CTkLabel(self, text="")
 
         # Create the button
-        self.rep_button = customtkinter.CTkButton(self.WAC_fails_window, text="Create .rep", font=customtkinter.CTkFont(size=20, weight="bold"), command=self.rep_creator)
+        self.rep_button = customtkinter.CTkButton(self, text="Create .rep", font=customtkinter.CTkFont(size=20, weight="bold"), command=self.rep_creator)
 
         # Create the rep output message
-        self.rep_label = customtkinter.CTkLabel(self.WAC_fails_window, text="")
+        self.rep_label = customtkinter.CTkLabel(self, text="")
        
 
         self.folder_path_label.grid(row=0, column=0, padx=20*SCALE_FACTOR, pady=20*SCALE_FACTOR)
@@ -153,21 +233,18 @@ class App(customtkinter.CTk):
 
         splitsheet_folder = '\\\\vdrsfile5\\wafersworkspace$\\_automation\\EASIsplitsD3\\'
 
-        # Set the path to the folder containing the CSV files
         template_path = '\\\\vdrsfile5\\wafersworkspace$\\22FDSOI\\Definition_Corners\\wac_fails_auto_report\\' 
-        
 
-        # List all CSV files in the current directory that start with 'lot'
+        # List all CSV files in the current directory that start with 'table'
         wac_csv_files = glob.glob(working_folder+'table*.csv')
+
 
         # Create an empty list to store the dataframes
         df_list = []
 
         # Loop through each CSV file and read it into a dataframe, then append it to the list. df_list is a list of dataframes.
         for filename in wac_csv_files:
-            #df = pd.read_csv(filename, error_bad_lines=False)
             df = pd.read_csv(filename, on_bad_lines='skip')
-            #df = df[~df['FLOW'].str.contains('Pass')] #removed the rows containing Pass.
             df_list.append(df)
 
         # Concatenate all the dataframes into a single one
@@ -356,7 +433,6 @@ class App(customtkinter.CTk):
         df_rep.iloc[3,2] = working_folder+ shortLot +'_wac_fails.plo.csv'
         df_rep.iloc[3,4] = working_folder+ shortLot +'_wac_fails.pptx'
 
-        #spl_path = glob.glob(working_folder+'*.spl.csv')[0]
         spl_path = working_folder+shortLot+'_FINAFWETFWET_AUTO.SPL.CSV'
         df_rep.iloc[0,2] = spl_path
 
@@ -372,105 +448,46 @@ class App(customtkinter.CTk):
 
         df_rep.to_csv(working_folder+ shortLot +'_wac_fails.rep.csv', index=False)
 
-        self.rep_label.configure(text="The .rep file has been created. \nFor MPW lots, you might need to change the limit file in the .rep to match to the correct Product ID.\nYou might need to modify the splitsheet if the report is for subset of wafers in a child lot.", font=customtkinter.CTkFont(size=16, weight="normal"), fg_color="green")
-
-
-    #---------------------------------------------------------functions: section EASI to XML --------------------------------------------------------------------------------------
-
-    def easi_to_xml(self):
-        erf_id = self.erf_id_entry.get()
-
-        url = 'http://tecnet.gfoundries.com/easi/getAjax.php?Step=getsplit&erfid='+ erf_id
-        # using http because https causes SSLError
-        
-        proxies = {
-        "http": 'http://dewwwp1.gfoundries.com:74',
-        "https": 'http://dewwwp1.gfoundries.com:74',
-            }
-
-        passwd = self.password_entry.get()
-        user_id = self.user_id_entry.get()
-        
-        
-        try:
-            r = requests.get(url, proxies=proxies, auth=(user_id, passwd))
-            xml_text = r.text
-            xml_text = xml_text.split('SPLIT_INFO')[1]
-            self.password_validity_label.configure(text="Correct password", font=customtkinter.CTkFont(size=20, weight="normal"), fg_color="blue")
-        except (IndexError, requests.exceptions.RequestException):
-            self.password_validity_label.configure(text="Check password!!!", font=customtkinter.CTkFont(size=20, weight="normal"), fg_color="red")
-            return
-        
-        xml_text = '<SPLIT_INFO' + xml_text + 'SPLIT_INFO>'
-        #Error if the texts before and after SPLIT_INFO are not removed
-
-        folder_path = '\\\\vdrsfile5\\wafersworkspace$\\22FDSOI\\Definition_ya\\XML\\'
-        
-        with open(folder_path + 'Raw.xml', 'w') as f:
-            f.write(xml_text)
-        
-        tree = ET.parse(folder_path + 'Raw.xml')
-        root_raw = tree.getroot()
-        
-        main_route = root_raw[0].text
-        #main route information is needed as it changes from Product to Product and is required for the import in the ERF.
-        
-        split_info = []
-        for instance in root_raw.iter('SPLIT_INSTANCEID'):
-            process = instance[0].text.split(sep = '-', maxsplit =1)[0] # to get LW,XW,3PL and SPK
-            for spl_grp in instance.iter('SPLIT_GROUP'):
-                split = process + ':'+ spl_grp.attrib['splitShort']
-                for waf in spl_grp:
-                    wafers = split + ':' + waf.text
-                    split_info.append(wafers)
-        
-        df = pd.DataFrame(split_info)
-        df.columns = ['Raw']
-        #There are some rows which are missing ';' at the end. This causes an issue when we have to concatenate the wafers. 
-        #The ~ operator is used to invert the boolean mask so that it selects the rows that do not end with ;
-        mask = ~df['Raw'].str.endswith(';') 
-        df.loc[mask, 'Raw'] = df.loc[mask, 'Raw'] + ';'
-        df['PD'] = df['Raw'].str.split(':', expand =True)[0]
-        df['Corner'] = df['Raw'].str.split(':', expand =True)[1]
-        df['Wafers'] = df['Raw'].str.split(':', expand =True)[2]
-        
-        SS_row = df.loc[(df['PD']=='SPIK') & (df['Corner'] =='SS_1.5S')]
-        FF_row = df.loc[(df['PD']=='SPIK') & (df['Corner'] =='FF_1.5S')]
-        rows_985C = df.loc[(df['PD']=='3PL') & (df['Corner'] !='SS_1.5S') & (df['Corner'] !='FF_1.5S')] 
-        
-        SS_wafers = SS_row.iloc[0][-1] # Wafer assignment is the last column
-        FF_wafers = FF_row.iloc[0][-1]
-        other_wafers = ''.join(rows_985C['Wafers']) #concatenate all rows in the 'Wafers' column
-        
-        tree = ET.parse(folder_path + 'new_3PL+10C\\' +'Template.xml')
-        root_new = tree.getroot()
-        
-        root_new[0].text = main_route
-        
-        for spl_grp in root_new.iter('SPLIT_GROUP'):
-            if spl_grp.attrib['splitShort'] == 'SS_1.5S':
-                for waf in spl_grp:
-                    waf.text = SS_wafers
-                    
-            elif spl_grp.attrib['splitShort'] == 'FF_1.5S':
-                for waf in spl_grp:
-                    waf.text = FF_wafers
-        
-            elif spl_grp.attrib['splitShort'] == '985C':
-                for waf in spl_grp:
-                    waf.text = other_wafers
-                    
-        tree.write(folder_path + 'New.xml')
-        
-        self.XML_label.configure(text="The XML file has been created as New.xml", font=customtkinter.CTkFont(size=20, weight="normal"), fg_color="blue")
+        self.rep_label.configure(text="The .rep file has been created. \nFor MPW lots, you might need to change the limit file in the .rep to match to the correct Product ID.\nYou might need to modify the splitsheet if the report is for a subset of wafers in a child lot.", font=customtkinter.CTkFont(size=16, weight="normal"), fg_color="green")
 
 
 
-    def toggle_password_visibility(self):
-        if self.show_password.get():
-            self.password_entry.configure(show="")
-        else:
-            self.password_entry.configure(show="*")
+
+class App(customtkinter.CTk):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.title("Tasks automation for 22FDX corner lots")
+        self.geometry(f"{400}x{200}")
+
+        self.EASI_to_XML_button = customtkinter.CTkButton(self, text="XML for ERFs", font=customtkinter.CTkFont(size=20, weight="bold"), command=self.open_easi_to_xml_window)
+        self.EASI_to_XML_button.pack(padx=10*SCALE_FACTOR, pady=10*SCALE_FACTOR)
+        self.WAC_fails_button = customtkinter.CTkButton(self, text="WAC fails", font=customtkinter.CTkFont(size=20, weight="bold"), command=self.open_wac_fails_window)
+        self.WAC_fails_button.pack(padx=10*SCALE_FACTOR, pady=20*SCALE_FACTOR)
+        
+        self.easi_to_xml_window_open = False
+        self.wac_fails_rep_window_open = False
+
+
+    def open_easi_to_xml_window(self):
+        if not self.easi_to_xml_window_open:
+            self.easi_to_xml_window_open = True
+            self.easi_to_xml_window = EASI_TO_XML_WINDOW(self)
+            self.easi_to_xml_window.protocol("WM_DELETE_WINDOW", self.close_easi_to_xml_window)
+
+    def open_wac_fails_window(self):
+        if not self.wac_fails_rep_window_open:
+            self.wac_fails_rep_window_open = True
+            self.wac_fails_window = WAC_FAILS_REP_WINDOW(self)
+            self.wac_fails_window.protocol("WM_DELETE_WINDOW", self.close_wac_fails_window)
+            
+    def close_easi_to_xml_window(self):
+        self.easi_to_xml_window_open = False
+        self.easi_to_xml_window.destroy()
+        
+    def close_wac_fails_window(self):
+        self.wac_fails_rep_window_open = False
+        self.wac_fails_window.destroy()
+
 
 if __name__ == "__main__":
     app = App()
