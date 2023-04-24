@@ -10,6 +10,7 @@ from pptx.dml.color import RGBColor
 from openpyxl import load_workbook
 import requests
 import xml.etree.ElementTree as ET
+import os
 
 customtkinter.set_appearance_mode("dark")  # Modes: system (default), light, dark
 customtkinter.set_default_color_theme("dark-blue")  # Themes: blue (default), dark-blue, green
@@ -20,91 +21,49 @@ class EASI_TO_XML_WINDOW(customtkinter.CTkToplevel):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.title("EASI to XML for 22FDX corner ERFs")
-        self.geometry(f"{600}x{550}")
+        self.geometry(f"{600}x{400}")
         self.geometry("+500+100")
 
-        # Create the user id input field
-        self.user_id_label = customtkinter.CTkLabel(self, text="User ID:", font=customtkinter.CTkFont(size=20, weight="normal"))
-        #self.user_id_label.pack()
-        self.user_id_entry = customtkinter.CTkEntry(self, font=customtkinter.CTkFont(size=20, weight="normal"), width=int(200*SCALE_FACTOR))
-        self.user_id_entry.insert(0, "yandee")
-        self.user_id_entry.pack(pady=10*SCALE_FACTOR)
-
-        # Create the password input field
-        self.password_label = customtkinter.CTkLabel(self, text="Password:", font=customtkinter.CTkFont(size=20, weight="normal"))
-        self.password_label.pack()
-        self.password_entry = customtkinter.CTkEntry(self, font=customtkinter.CTkFont(size=20, weight="normal"), width=int(200*SCALE_FACTOR), show="*")
-        self.password_entry.insert(0, "Lastpassword31")
-        self.password_entry.pack(pady=10*SCALE_FACTOR)
-
-        # Create the show password checkbutton
-        self.show_password = tk.BooleanVar()
-        self.show_password.set(False)
-        self.show_password_checkbutton = tk.Checkbutton(self, text="Show password", variable=self.show_password, font=customtkinter.CTkFont(size=20, weight="normal"), command=self.toggle_password_visibility)
-        self.show_password_checkbutton.pack(pady=10*SCALE_FACTOR)
-
-        # Create the correct/incorrect password label
-        self.password_validity_label = customtkinter.CTkLabel(self, text="", font=customtkinter.CTkFont(size=14, weight="normal"))
-        self.password_validity_label.pack(pady=10*SCALE_FACTOR)
-
         # Create the erf_id input field
-        self.erf_id_label = customtkinter.CTkLabel(self, text="Enter the EASI ErfID:", font=customtkinter.CTkFont(size=20, weight="normal"))
-        self.erf_id_label.pack(pady=10*SCALE_FACTOR)
-        self.erf_id_entry = customtkinter.CTkEntry(self, font=customtkinter.CTkFont(size=20, weight="normal"), width=int(200*SCALE_FACTOR))
-        self.erf_id_entry.pack(pady=10*SCALE_FACTOR)
+        self.lot_id_label = customtkinter.CTkLabel(self, text="Enter the lot number:", font=customtkinter.CTkFont(size=20, weight="normal"))
+        self.lot_id_label.pack(pady=10*SCALE_FACTOR)
+        self.lot_id_entry = customtkinter.CTkEntry(self, font=customtkinter.CTkFont(size=20, weight="normal"), width=int(200*SCALE_FACTOR))
+        self.lot_id_entry.pack(pady=10*SCALE_FACTOR)
 
         # Create the button
         self.XML_button = customtkinter.CTkButton(self, text="XML", font=customtkinter.CTkFont(size=20, weight="normal"), command=self.easi_to_xml)
         self.XML_button.pack(pady=10*SCALE_FACTOR)
 
         # Create the XML label
-        self.XML_label = customtkinter.CTkLabel(self, text="", font=customtkinter.CTkFont(size=20, weight="normal"))
-        self.XML_label.pack(pady=10*SCALE_FACTOR)
+        self.XML_file_label = customtkinter.CTkLabel(self, text="", font=customtkinter.CTkFont(size=14, weight="normal"))
+        self.XML_file_label.pack(pady=10*SCALE_FACTOR)
+
+        # Create the XML label
+        self.XML_result_label = customtkinter.CTkLabel(self, text="", font=customtkinter.CTkFont(size=16, weight="normal"))
+        self.XML_result_label.pack(pady=10*SCALE_FACTOR)
 
         # Create the missing template label
-        self.missing_template_label = customtkinter.CTkLabel(self, text="", font=customtkinter.CTkFont(size=20, weight="normal"))
-        self.missing_template_label.pack(pady=10*SCALE_FACTOR)
+        self.xml_template_label = customtkinter.CTkLabel(self, text="", font=customtkinter.CTkFont(size=20, weight="normal"))
+        self.xml_template_label.pack(pady=10*SCALE_FACTOR)
         
 
     def easi_to_xml(self):
-        erf_id = self.erf_id_entry.get()
+        xml_files_folder = '\\\\vdrsfile5\\wafersworkspace$\\_automation\\EASIsplitsXML\\'
+        EASI_to_XML_folder = '\\\\vdrsfile5\\wafersworkspace$\\22FDSOI\\Definition_Corners\\EASI_to_XML\\'
+        xml_template_path = EASI_to_XML_folder + 'new_3PL+10C\\' +'Template.xml'
 
-        url = 'http://tecnet.gfoundries.com/easi/getAjax.php?Step=getsplit&erfid='+ erf_id
-        # using http because https causes SSLError
+        lot_id = self.lot_id_entry.get()
+        shortLot = lot_id.split(".")[0]
+        xml_file_path = xml_files_folder + 'DesignSplit_'+ shortLot + '.xml'
         
-        proxies = {
-        "http": 'http://dewwwp1.gfoundries.com:74',
-        "https": 'http://dewwwp1.gfoundries.com:74',
-            }
-
-        passwd = self.password_entry.get()
-        user_id = self.user_id_entry.get()
-        
-        
-        try:
-            r = requests.get(url, proxies=proxies, auth=(user_id, passwd))
-            xml_text = r.text
-            xml_text = xml_text.split('SPLIT_INFO')[1]
-            self.password_validity_label.configure(text="Correct password", font=customtkinter.CTkFont(size=14, weight="normal"), fg_color="blue")
-        except (IndexError, requests.exceptions.RequestException):
-            self.password_validity_label.configure(text="Check password or ERF ID!!!", font=customtkinter.CTkFont(size=14, weight="normal"), fg_color="red")
-            return
-        
-        xml_text = '<SPLIT_INFO' + xml_text + 'SPLIT_INFO>'
-        #Error if the texts before and after SPLIT_INFO are not removed
-
-        folder_path = '\\\\vdrsfile5\\wafersworkspace$\\22FDSOI\\Definition_Corners\\EASI_to_XML\\'
-        
-        try:
-            with open(folder_path + 'Raw.xml', 'w') as f:
-                f.write(xml_text)
-
-        except(FileNotFoundError):
-            self.missing_template_label.configure(self, text="Template files not found.\nCheck that the path "+ folder_path + " has not been moved or renamed." , font=customtkinter.CTkFont(size=14, weight="normal"), fg_color="red")
-            self.missing_template_label.pack(pady=10*SCALE_FACTOR)
+        if os.path.isfile(xml_file_path):
+            self.XML_file_label.configure(text="xml file found", font=customtkinter.CTkFont(size=14, weight="normal"), fg_color="blue")
+            # Add your code here to load the CSV file
+        else:
+            self.XML_file_label.configure(text="xml file not found in \n" + xml_files_folder, font=customtkinter.CTkFont(size=14, weight="normal"), fg_color="red")
             return
 
-        tree = ET.parse(folder_path + 'Raw.xml')
+        tree = ET.parse(xml_file_path)
         root_raw = tree.getroot()
         
         main_route = root_raw[0].text
@@ -137,38 +96,37 @@ class EASI_TO_XML_WINDOW(customtkinter.CTkToplevel):
         FF_wafers = FF_row.iloc[0][-1]
         other_wafers = ''.join(rows_985C['Wafers']) #concatenate all rows in the 'Wafers' column
         
-        tree = ET.parse(folder_path + 'new_3PL+10C\\' +'Template.xml')
-        root_new = tree.getroot()
-        
-        root_new[0].text = main_route
-        
-        for spl_grp in root_new.iter('SPLIT_GROUP'):
-            if spl_grp.attrib['splitShort'] == 'SS_1.5S':
-                for waf in spl_grp:
-                    waf.text = SS_wafers
-                    
-            elif spl_grp.attrib['splitShort'] == 'FF_1.5S':
-                for waf in spl_grp:
-                    waf.text = FF_wafers
-        
-            elif spl_grp.attrib['splitShort'] == '985C':
-                for waf in spl_grp:
-                    waf.text = other_wafers
-                    
-        tree.write(folder_path + 'New.xml')
-        
-        self.XML_label.configure(text="The XML file has been created.", font=customtkinter.CTkFont(size=14, weight="normal"), fg_color="blue")
-        self.xml_textbox = customtkinter.CTkTextbox(self, width=550, height=50)
-        self.xml_textbox.insert("0.0", "In SplitSheet tab of your ERF, import from XML:\n"+ folder_path + "New.xml")
-        self.xml_textbox.configure(font=('Helvetica', 14), state="disabled")
-        self.xml_textbox.pack()
-
-
-    def toggle_password_visibility(self):
-        if self.show_password.get():
-            self.password_entry.configure(show="")
+        if os.path.isfile(xml_template_path):
+            self.xml_template_label.configure(text="")    
+            tree = ET.parse(xml_template_path)
+            root_new = tree.getroot()
+            
+            root_new[0].text = main_route
+            
+            for spl_grp in root_new.iter('SPLIT_GROUP'):
+                if spl_grp.attrib['splitShort'] == 'SS_1.5S':
+                    for waf in spl_grp:
+                        waf.text = SS_wafers
+                        
+                elif spl_grp.attrib['splitShort'] == 'FF_1.5S':
+                    for waf in spl_grp:
+                        waf.text = FF_wafers
+            
+                elif spl_grp.attrib['splitShort'] == '985C':
+                    for waf in spl_grp:
+                        waf.text = other_wafers
+                        
+            tree.write(EASI_to_XML_folder + 'New.xml')
+            
+            self.XML_result_label.configure(text="The XML file has been created.", font=customtkinter.CTkFont(size=14, weight="normal"), fg_color="blue")
+            self.xml_textbox = customtkinter.CTkTextbox(self, width=550, height=50)
+            self.xml_textbox.insert("0.0", "In SplitSheet tab of your ERF, import from XML:\n"+ EASI_to_XML_folder + "New.xml")
+            self.xml_textbox.configure(font=('Helvetica', 14), state="disabled")
+            self.xml_textbox.pack()
         else:
-            self.password_entry.configure(show="*")
+            self.xml_template_label.configure(text="Template xml file not found in \n" + EASI_to_XML_folder, font=customtkinter.CTkFont(size=14, weight="normal"), fg_color="red")
+            return
+
 
 
 
