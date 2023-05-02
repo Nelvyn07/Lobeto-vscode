@@ -1,4 +1,3 @@
-import tkinter as tk
 import customtkinter
 import webbrowser
 import time
@@ -8,14 +7,11 @@ from pptx import Presentation
 from pptx.util import Inches, Pt
 from pptx.dml.color import RGBColor
 from openpyxl import load_workbook
-import requests
 import xml.etree.ElementTree as ET
 import os
 
 customtkinter.set_appearance_mode("dark")  # Modes: system (default), light, dark
 customtkinter.set_default_color_theme("dark-blue")  # Themes: blue (default), dark-blue, green
-
-SCALE_FACTOR = 1
 
 class EASI_TO_XML_WINDOW(customtkinter.CTkToplevel):
     def __init__(self, *args, **kwargs):
@@ -26,25 +22,25 @@ class EASI_TO_XML_WINDOW(customtkinter.CTkToplevel):
 
         # Create the erf_id input field
         self.lot_id_label = customtkinter.CTkLabel(self, text="Enter the lot number:", font=customtkinter.CTkFont(size=20, weight="normal"))
-        self.lot_id_label.pack(pady=10*SCALE_FACTOR)
-        self.lot_id_entry = customtkinter.CTkEntry(self, font=customtkinter.CTkFont(size=20, weight="normal"), width=int(200*SCALE_FACTOR))
-        self.lot_id_entry.pack(pady=10*SCALE_FACTOR)
+        self.lot_id_label.pack(pady=10)
+        self.lot_id_entry = customtkinter.CTkEntry(self, font=customtkinter.CTkFont(size=20, weight="normal"), width=int(200))
+        self.lot_id_entry.pack(pady=10)
 
         # Create the button
         self.XML_button = customtkinter.CTkButton(self, text="XML", font=customtkinter.CTkFont(size=20, weight="normal"), command=self.easi_to_xml)
-        self.XML_button.pack(pady=10*SCALE_FACTOR)
+        self.XML_button.pack(pady=10)
 
         # Create the XML label
         self.XML_file_label = customtkinter.CTkLabel(self, text="", font=customtkinter.CTkFont(size=14, weight="normal"))
-        self.XML_file_label.pack(pady=10*SCALE_FACTOR)
+        self.XML_file_label.pack(pady=10)
 
         # Create the XML label
         self.XML_result_label = customtkinter.CTkLabel(self, text="", font=customtkinter.CTkFont(size=16, weight="normal"))
-        self.XML_result_label.pack(pady=10*SCALE_FACTOR)
+        self.XML_result_label.pack(pady=10)
 
         # Create the missing template label
         self.xml_template_label = customtkinter.CTkLabel(self, text="", font=customtkinter.CTkFont(size=20, weight="normal"))
-        self.xml_template_label.pack(pady=10*SCALE_FACTOR)
+        self.xml_template_label.pack(pady=10)
         
 
     def easi_to_xml(self):
@@ -141,7 +137,7 @@ class WAC_FAILS_REP_WINDOW(customtkinter.CTkToplevel):
         # Create the folder_path input field
         self.folder_path_label = customtkinter.CTkLabel(self, text="Enter the working folder path in the format \\\\vdrsfile5\wafersworkspace$\\22FDSOI\Product\Lot : ", font=customtkinter.CTkFont(size=20, weight="normal"))
 
-        self.folder_path_entry = customtkinter.CTkEntry(self, font=customtkinter.CTkFont(size=20, weight="normal"), width=int(900*SCALE_FACTOR))
+        self.folder_path_entry = customtkinter.CTkEntry(self, font=customtkinter.CTkFont(size=20, weight="normal"), width=int(900))
 
         self.wac_textbox = customtkinter.CTkTextbox(self, width=900, height=100)
         self.wac_textbox.insert("0.0", "Get the WAC fails csv files (one csv file for each child lot) from Lobeto: click on FAILS ONLY->EXPORT XLS). \nThe csv files have their default names starting by 'table.csv'. Do not change the name, just place them in the waferworkspace folder.\n If you have to plot the WAC fails on the mother lot (.000) only, you can directly get the link to Lobeto by clicking on the Lobeto link.")
@@ -165,16 +161,16 @@ class WAC_FAILS_REP_WINDOW(customtkinter.CTkToplevel):
         self.rep_label = customtkinter.CTkLabel(self, text="")
        
 
-        self.folder_path_label.grid(row=0, column=0, padx=20*SCALE_FACTOR, pady=20*SCALE_FACTOR)
-        self.folder_path_entry.grid(row=1, column=0, padx=20, pady=10*SCALE_FACTOR)
-        self.wac_textbox.grid(row=2, column=0, padx=20, pady=10*SCALE_FACTOR)
-        self.lobeto_button.grid(row=2, column=1, padx=10*SCALE_FACTOR)
-        self.rep_button.grid(row=3, column=0, pady=10*SCALE_FACTOR)
-        self.WAC_fails_file_label.grid(row=4, column=0, pady=10*SCALE_FACTOR)
-        self.splitfile_label.grid(row=5, column=0, pady=10*SCALE_FACTOR)
-        self.template_label.grid(row=6, column=0, pady=10*SCALE_FACTOR)
-        self.limit_file_label.grid(row=6, column=0, pady=10*SCALE_FACTOR)
-        self.rep_label.grid(row=6, column=0, pady=10*SCALE_FACTOR)
+        self.folder_path_label.grid(row=0, column=0, padx=20, pady=20)
+        self.folder_path_entry.grid(row=1, column=0, padx=20, pady=10)
+        self.wac_textbox.grid(row=2, column=0, padx=20, pady=10)
+        self.lobeto_button.grid(row=2, column=1, padx=10)
+        self.rep_button.grid(row=3, column=0, pady=10)
+        self.WAC_fails_file_label.grid(row=4, column=0, pady=10)
+        self.splitfile_label.grid(row=5, column=0, pady=10)
+        self.template_label.grid(row=6, column=0, pady=10)
+        self.limit_file_label.grid(row=6, column=0, pady=10)
+        self.rep_label.grid(row=6, column=0, pady=10)
 
     #---------------------------------functions: WAC fails section---------------------------------------------------------------------
     def lobeto_link(self):
@@ -408,6 +404,106 @@ class WAC_FAILS_REP_WINDOW(customtkinter.CTkToplevel):
 
         self.rep_label.configure(text="The .rep file has been created. \nFor MPW lots, you might need to change the limit file in the .rep to match to the correct Product ID.\nYou might need to modify the splitsheet if the report is for a subset of wafers in a child lot.", font=customtkinter.CTkFont(size=16, weight="normal"), fg_color="green")
 
+class SPLITSHEET_AGGREGATOR_WINDOW(customtkinter.CTkToplevel):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.title("Splitsheet Aggregator")
+        self.geometry(f"{600}x{400}")
+        self.geometry("+500+300")
+        self.label = customtkinter.CTkLabel(self, text="Enter the Product folder, e.g:\n \\\\vdrsfile5\\wafersworkspace$\\22FDSOI\\HERMES1:")
+        self.label.pack()
+
+        self.product_path = customtkinter.CTkEntry(self)
+        self.product_path.pack()
+
+        self.checkbox_fwet_var = customtkinter.CTkBooleanVar()
+        self.checkbox_fwet_var.set(True)
+        self.checkbox_fwet = customtkinter.CTkCheckbutton(self, text="FWET", variable=self.checkbox_fwet_var)
+        self.checkbox_fwet.pack()
+
+        self.checkbox_swet_var = customtkinter.CTkBooleanVar()
+        self.checkbox_swet_var.set(False)
+        self.checkbox_swet = customtkinter.CTkCheckbutton(self, text="SWET", variable=self.checkbox_swet_var)
+        self.checkbox_swet.pack()
+
+        self.splitsheet_button = customtkinter.CTkButton(self, text="Create Splitsheet", command=self.splitsheet)
+        self.splitsheet_button.pack()
+
+        self.fwet_result_label = customtkinter.CTkLabel(self, text="")
+        self.fwet_result_label.pack()
+
+        self.swet_result_label = customtkinter.CTkLabel(self, text="")
+        self.swet_result_label.pack()
+
+        def splitsheet(self):
+            product_path = self.product_path.get()
+            checkbox_fwet_state = self.checkbox_fwet_var.get()
+            checkbox_swet_state = self.checkbox_swet_var.get()
+
+            if checkbox_fwet_state and checkbox_swet_state:
+                fwet_spl_files = glob.glob(product_path +'\\**\\*_FINAFWETFWET_AUTO.SPL.CSV')
+                swet_spl_files = glob.glob(product_path +'\\**\\*_M1SWETSWET_AUTO.SPL.CSV')
+                # Create an empty list to store the dataframes
+                df_list_fwet = []
+
+                # Loop through each CSV file and read it into a dataframe, then append it to the list. df_list is a list of dataframes.
+                for filename in fwet_spl_files:
+                    df_fwet = pd.read_csv(filename, on_bad_lines='skip')
+                    df_list_fwet.append(df_fwet)
+
+                if fwet_spl_files:
+                    df_fwet = pd.concat(df_list_fwet)
+                    df_fwet.to_csv(product_path + '\\fwet.spl.csv', index = None)
+                    self.fwet_result_label.configure(text="FWET Splitsheet created:\n" + product_path + '\\fwet.spl.csv')
+                else:
+                    self.fwet_result_label.configure(text="No FWET splisheet found")
+
+                df_list_swet = []
+                for filename in swet_spl_files:
+                    df_swet = pd.read_csv(filename, on_bad_lines='skip')
+                    df_list_swet.append(df_swet)
+
+                if swet_spl_files:
+                    df_swet = pd.concat(df_list_swet)
+                    df_swet.to_csv(product_path + '\\m1swet.spl.csv', index = None)
+                    self.swet_result_label.configure(text="M1SWET Splitsheet created:\n" + product_path + '\\m1swet.spl.csv')
+                else:
+                    self.fwet_result_label.configure(text="No SWET splisheet found")
+
+
+
+            if checkbox_fwet_state:
+                fwet_spl_files = glob.glob(product_path +'\\**\\*_FINAFWETFWET_AUTO.SPL.CSV')
+                # Create an empty list to store the dataframes
+                df_list_fwet = []
+
+                # Loop through each CSV file and read it into a dataframe, then append it to the list. df_list is a list of dataframes.
+                for filename in fwet_spl_files:
+                    df_fwet = pd.read_csv(filename, on_bad_lines='skip')
+                    df_list_fwet.append(df_fwet)
+
+                if fwet_spl_files:
+                    df_fwet = pd.concat(df_list_fwet)
+                    df_fwet.to_csv(product_path + '\\fwet.spl.csv', index = None)
+                    self.fwet_result_label.configure(text="Splitsheet created:\n" + product_path + '\\fwet.spl.csv')
+                else:
+                    self.fwet_result_label.configure(text="No FWET splisheet found")
+
+
+            elif checkbox_swet_state:
+                swet_spl_files = glob.glob(product_path +'\\**\\*_M1SWETSWET_AUTO.SPL.CSV')
+                # Create an empty list to store the dataframes
+                df_list_swet = []
+                for filename in swet_spl_files:
+                    df_swet = pd.read_csv(filename, on_bad_lines='skip')
+                    df_list_swet.append(df_swet)
+
+                if swet_spl_files:
+                    df_swet = pd.concat(df_list_swet)
+                    df_swet.to_csv(product_path + '\\m1swet.spl.csv', index = None)
+                    self.swet_result_label.configure(text="Splitsheet created:\n" + product_path + '\\m1swet.spl.csv')
+                else:
+                    self.swet_result_label.configure(text="No SWET splisheet found")
 
 
 
@@ -418,12 +514,17 @@ class App(customtkinter.CTk):
         self.geometry(f"{400}x{200}")
 
         self.EASI_to_XML_button = customtkinter.CTkButton(self, text="XML for ERFs", font=customtkinter.CTkFont(size=20, weight="bold"), command=self.open_easi_to_xml_window)
-        self.EASI_to_XML_button.pack(padx=10*SCALE_FACTOR, pady=10*SCALE_FACTOR)
+        self.EASI_to_XML_button.pack(padx=10, pady=10)
+        
         self.WAC_fails_button = customtkinter.CTkButton(self, text="WAC fails", font=customtkinter.CTkFont(size=20, weight="bold"), command=self.open_wac_fails_window)
-        self.WAC_fails_button.pack(padx=10*SCALE_FACTOR, pady=20*SCALE_FACTOR)
+        self.WAC_fails_button.pack(padx=10, pady=20)
+        
+        self.splitsheet_aggregator_button = customtkinter.CTkButton(self, text="Splitsheet Aggregator", font=customtkinter.CTkFont(size=20, weight="bold"), command=self.open_splitsheet_aggregator_window)
+        self.splitsheet_aggregator_button.pack(padx=10, pady=10)
         
         self.easi_to_xml_window_open = False
         self.wac_fails_rep_window_open = False
+        self.splitsheet_aggregator_window_open = False
 
 
     def open_easi_to_xml_window(self):
@@ -437,7 +538,13 @@ class App(customtkinter.CTk):
             self.wac_fails_rep_window_open = True
             self.wac_fails_window = WAC_FAILS_REP_WINDOW(self)
             self.wac_fails_window.protocol("WM_DELETE_WINDOW", self.close_wac_fails_window)
-            
+
+    def open_splitsheet_aggregator_window(self):
+        if not self.splitsheet_aggregator_window_open:
+            self.splitsheet_aggregator_window_open = True
+            self.splitsheet_aggregator_window = SPLITSHEET_AGGREGATOR_WINDOW(self)
+            self.splitsheet_aggregator_window.protocol("WM_DELETE_WINDOW", self.close_splitsheet_aggregator_window) 
+
     def close_easi_to_xml_window(self):
         self.easi_to_xml_window_open = False
         self.easi_to_xml_window.destroy()
@@ -446,6 +553,9 @@ class App(customtkinter.CTk):
         self.wac_fails_rep_window_open = False
         self.wac_fails_window.destroy()
 
+    def close_splitsheet_aggregator_window(self):
+        self.splitsheet_aggregator_window_open = False
+        self.easi_to_splitsheet_aggregator.destroy()
 
 if __name__ == "__main__":
     app = App()
